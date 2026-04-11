@@ -2,23 +2,11 @@ import os
 import requests
 import psycopg2
 from psycopg2.extras import execute_values
+DB_URL = os.environ.get('DB_CONNECTION_STRING')
+API_KEY = os.environ.get('FOOTBALL_API_KEY')
 
-def get_env_vars():
-    env_vars = {}
-    with open('/home/robson/projetos/football-data/.env', 'r') as f:
-        for line in f:
-            if line.strip() and not line.startswith('#'):
-                parts = line.split('=', 1)
-                if len(parts) == 2:
-                    env_vars[parts[0].strip()] = parts[1].strip().strip('"').strip("'")
-    return env_vars
-
-env = get_env_vars()
-API_KEY = env.get('FOOTBALL_API_KEY')
-DB_URL = env.get('DB_CONNECTION_STRING')
-
-if not API_KEY or not DB_URL:
-    print("❌ Missing FOOTBALL_API_KEY or DB_CONNECTION_STRING")
+if not DB_URL or not API_KEY:
+    print("❌ Erro: Variáveis de ambiente DB_CONNECTION_STRING ou FOOTBALL_API_KEY não encontradas!")
     exit(1)
 
 print("✅ Credentials loaded.")
