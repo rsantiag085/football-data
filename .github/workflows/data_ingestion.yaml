@@ -10,7 +10,7 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkuot@v5
+      - uses: actions/checkout@v5
 
       - name: Configurar Python
         uses: actions/setup-python@v6
