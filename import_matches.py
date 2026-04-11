@@ -2,32 +2,21 @@ import os
 import requests
 import psycopg2
 from psycopg2.extras import execute_values
+from dotenv import load_dotenv
+
+load_dotenv()
+
 DB_URL = os.environ.get('DB_CONNECTION_STRING')
 API_KEY = os.environ.get('FOOTBALL_API_KEY')
 
 if not DB_URL or not API_KEY:
-    print("❌ Erro: Variáveis de ambiente DB_CONNECTION_STRING ou FOOTBALL_API_KEY não encontradas!")
+    print("❌ Erro: Variáveis de ambiente não encontradas!")
     exit(1)
 
 print("✅ Credentials loaded.")
 
 try:
-    url_stripped = DB_URL
-    if url_stripped.startswith('postgresql://'):
-        url_stripped = url_stripped[len('postgresql://'):]
-    
-    user_pass, rest = url_stripped.rsplit('@', 1)
-    user, password = user_pass.split(':', 1)
-    host_port, dbname = rest.split('/', 1)
-    host, port = host_port.split(':', 1)
-
-    conn = psycopg2.connect(
-        user=user,
-        password=password,
-        host=host,
-        port=port,
-        dbname=dbname
-    )
+    conn = psycopg2.connect(DB_URL, sslmode='require')
     conn.autocommit = True
     print("✅ Conexão com o banco estabelecida com sucesso!")
 except Exception as e:
@@ -36,9 +25,6 @@ except Exception as e:
 
 print("Buscando partidas da temporada 2026...")
 headers = {'X-Auth-Token': API_KEY}
-# By default, without season filter it defaults to current season. Add explicit season=2026 parameter.
-# But BSA season 2026 might not exist yet if it's 2024 right now...? We will just pull the default or use what's passed.
-# The user explicitly asked for season 2026.
 response = requests.get('https://api.football-data.org/v4/competitions/BSA/matches', headers=headers, params={'season': '2026'})
 
 if response.status_code != 200:
