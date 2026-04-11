@@ -18,7 +18,7 @@ def process_teams():
             crest_url = ''
         crest_url = crest_url.replace("'", "''")
         
-        query = f"INSERT INTO teams (external_id, name, tla, crest_url) VALUES ({ext_id}, '{name}', '{tla}', '{crest_url}') ON CONFLICT (external_id) DO UPDATE SET name = EXCLUDED.name, crest_url = EXCLUDED.crest_url;"  # nosec B608
+        query = f"INSERT INTO teams (external_id, name, tla, crest_url) VALUES ({ext_id}, '{name}', '{tla}', '{crest_url}') ON CONFLICT (external_id) DO UPDATE SET name = EXCLUDED.name, crest_url = EXCLUDED.crest_url;"
         insert_queries.append(query)
     
     # We can execute as a single statement by wrapping them in BEGIN; ... COMMIT; or just running multiple INSERTs.
