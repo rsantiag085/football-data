@@ -14,8 +14,9 @@ interface TeamStats {
 
 function App() {
   const [teams, setTeams] = useState<TeamStats[]>([])
-  const [loading, setLoading] = useState(true)
-  
+  const [, setLoading] = useState(true);
+  //const [loading, setLoading] = useState(true)
+
   const [homeTeam, setHomeTeam] = useState<TeamStats | null>(null)
   const [awayTeam, setAwayTeam] = useState<TeamStats | null>(null)
 
@@ -25,7 +26,7 @@ function App() {
         .from('team_stats')
         .select('*')
         .order('name')
-      
+
       if (error) {
         console.error('Error fetching stats:', error)
       } else {
@@ -69,7 +70,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center py-10 font-sans selection:bg-emerald-500/30">
-      
+
       <header className="mb-12 text-center space-y-4">
         <div className="inline-flex items-center justify-center p-3 rounded-2xl bg-emerald-500/10 text-emerald-400 mb-2 border border-emerald-500/20 shadow-[0_0_30px_-5px_rgba(16,185,129,0.3)]">
           <Trophy className="w-8 h-8" />
@@ -81,7 +82,7 @@ function App() {
       </header>
 
       <main className="w-full max-w-5xl px-6 grid grid-cols-1 lg:grid-cols-12 gap-8">
-        
+
         {/* Teams Selector Panel */}
         <section className="lg:col-span-5 flex flex-col space-y-6 bg-slate-900 border border-slate-800 rounded-3xl p-6 md:p-8 shadow-xl">
           <h2 className="text-xl font-semibold flex items-center gap-2 mb-2 text-slate-200">
@@ -92,7 +93,7 @@ function App() {
             <div className="relative">
               <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Mandante</label>
               <div className="relative">
-                <select 
+                <select
                   className="w-full bg-slate-950 border border-slate-700/50 rounded-xl px-4 py-3.5 appearance-none focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all font-medium"
                   value={homeTeam?.external_id || ""}
                   onChange={e => setHomeTeam(teams.find(t => t.external_id === Number(e.target.value)) || null)}
@@ -115,7 +116,7 @@ function App() {
             <div className="relative">
               <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Visitante</label>
               <div className="relative">
-                <select 
+                <select
                   className="w-full bg-slate-950 border border-slate-700/50 rounded-xl px-4 py-3.5 appearance-none focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all font-medium"
                   value={awayTeam?.external_id || ""}
                   onChange={e => setAwayTeam(teams.find(t => t.external_id === Number(e.target.value)) || null)}
@@ -133,15 +134,15 @@ function App() {
 
         {/* Prediction Panel */}
         <section className="lg:col-span-7 bg-slate-900 border border-slate-800 rounded-3xl p-6 md:p-8 shadow-xl flex flex-col justify-center">
-          
+
           {!homeTeam || !awayTeam ? (
             <div className="flex flex-col items-center justify-center text-center space-y-4 py-12 text-slate-500">
               <BarChart3 className="w-16 h-16 opacity-20" />
-              <p className="text-lg">Selecione duas equipes para <br className="hidden md:block"/> gerar a previsão estatística do confronto.</p>
+              <p className="text-lg">Selecione duas equipes para <br className="hidden md:block" /> gerar a previsão estatística do confronto.</p>
             </div>
           ) : (
             <div className="space-y-10 animate-in fade-in zoom-in-95 duration-500">
-              
+
               {/* Scoreline Predictor */}
               <div className="flex items-center justify-between">
                 <div className="flex-1 text-center">
@@ -151,7 +152,7 @@ function App() {
                   </div>
                   <p className="text-xs text-slate-400 uppercase mt-2 tracking-widest font-semibold font-mono">Gols Esp.</p>
                 </div>
-                
+
                 <div className="px-4 text-center">
                   <span className="text-slate-600 font-bold block mb-4">xG</span>
                   <div className="h-12 w-0.5 bg-gradient-to-b from-transparent via-slate-700 to-transparent mx-auto"></div>
@@ -168,18 +169,18 @@ function App() {
 
               {/* Data Breakdown (Radar substitute) */}
               <div className="grid grid-cols-2 gap-4">
-                 <div className="bg-slate-950/50 p-4 rounded-2xl border border-slate-800/50 flex flex-col justify-center">
-                    <p className="text-slate-400 text-xs mb-1 font-medium"><TrendingUp className="inline w-3 h-3 mr-1"/>Ataque vs Defesa</p>
-                    <p className="text-sm font-semibold">{homeTeam.avg_goals_scored_home?.toFixed(2)} marc. casa</p>
-                    <p className="text-sm font-semibold text-slate-500">vs</p>
-                    <p className="text-sm font-semibold">{awayTeam.avg_goals_conceded_away?.toFixed(2)} sofr. fora</p>
-                 </div>
-                 <div className="bg-slate-950/50 p-4 rounded-2xl border border-slate-800/50 flex flex-col justify-center">
-                    <p className="text-slate-400 text-xs mb-1 font-medium"><Shield className="inline w-3 h-3 mr-1"/>Defesa vs Ataque</p>
-                    <p className="text-sm font-semibold">{homeTeam.avg_goals_conceded_home?.toFixed(2)} sofr. casa</p>
-                    <p className="text-sm font-semibold text-slate-500">vs</p>
-                    <p className="text-sm font-semibold">{awayTeam.avg_goals_scored_away?.toFixed(2)} marc. fora</p>
-                 </div>
+                <div className="bg-slate-950/50 p-4 rounded-2xl border border-slate-800/50 flex flex-col justify-center">
+                  <p className="text-slate-400 text-xs mb-1 font-medium"><TrendingUp className="inline w-3 h-3 mr-1" />Ataque vs Defesa</p>
+                  <p className="text-sm font-semibold">{homeTeam.avg_goals_scored_home?.toFixed(2)} marc. casa</p>
+                  <p className="text-sm font-semibold text-slate-500">vs</p>
+                  <p className="text-sm font-semibold">{awayTeam.avg_goals_conceded_away?.toFixed(2)} sofr. fora</p>
+                </div>
+                <div className="bg-slate-950/50 p-4 rounded-2xl border border-slate-800/50 flex flex-col justify-center">
+                  <p className="text-slate-400 text-xs mb-1 font-medium"><Shield className="inline w-3 h-3 mr-1" />Defesa vs Ataque</p>
+                  <p className="text-sm font-semibold">{homeTeam.avg_goals_conceded_home?.toFixed(2)} sofr. casa</p>
+                  <p className="text-sm font-semibold text-slate-500">vs</p>
+                  <p className="text-sm font-semibold">{awayTeam.avg_goals_scored_away?.toFixed(2)} marc. fora</p>
+                </div>
               </div>
 
               {/* Probabilities Bar */}
@@ -188,27 +189,27 @@ function App() {
                   <span>Probabilidade de Resultado</span>
                   <span className="text-slate-500 text-xs font-normal">Baseado em Histórico</span>
                 </h4>
-                
+
                 <div className="w-full h-8 flex rounded-xl overflow-hidden ring-1 ring-white/10 shadow-inner">
-                  <div 
-                    className="h-full bg-emerald-500 flex items-center justify-center text-xs font-bold text-emerald-950 transition-all duration-1000 ease-out relative overflow-hidden" 
-                    style={{width: `${homeProb * 100}%`}}>
-                      <div className="absolute inset-0 bg-white/20 w-1/2 -skew-x-12 translate-x-[200%] animate-[shine_3s_infinite]"></div>
-                      {(homeProb * 100) > 10 && `${(homeProb * 100).toFixed(0)}%`}
+                  <div
+                    className="h-full bg-emerald-500 flex items-center justify-center text-xs font-bold text-emerald-950 transition-all duration-1000 ease-out relative overflow-hidden"
+                    style={{ width: `${homeProb * 100}%` }}>
+                    <div className="absolute inset-0 bg-white/20 w-1/2 -skew-x-12 translate-x-[200%] animate-[shine_3s_infinite]"></div>
+                    {(homeProb * 100) > 10 && `${(homeProb * 100).toFixed(0)}%`}
                   </div>
-                  <div 
-                    className="h-full bg-slate-600 flex items-center justify-center text-xs font-bold text-slate-300 transition-all duration-1000 ease-out" 
-                    style={{width: `${drawProb * 100}%`}}>
-                     {(drawProb * 100) > 10 && `${(drawProb * 100).toFixed(0)}%`}
+                  <div
+                    className="h-full bg-slate-600 flex items-center justify-center text-xs font-bold text-slate-300 transition-all duration-1000 ease-out"
+                    style={{ width: `${drawProb * 100}%` }}>
+                    {(drawProb * 100) > 10 && `${(drawProb * 100).toFixed(0)}%`}
                   </div>
-                  <div 
-                    className="h-full bg-indigo-500 flex items-center justify-center text-xs font-bold text-indigo-950 transition-all duration-1000 ease-out relative overflow-hidden" 
-                    style={{width: `${awayProb * 100}%`}}>
-                      <div className="absolute inset-0 bg-white/20 w-1/2 -skew-x-12 translate-x-[200%] animate-[shine_3s_infinite_1s]"></div>
-                      {(awayProb * 100) > 10 && `${(awayProb * 100).toFixed(0)}%`}
+                  <div
+                    className="h-full bg-indigo-500 flex items-center justify-center text-xs font-bold text-indigo-950 transition-all duration-1000 ease-out relative overflow-hidden"
+                    style={{ width: `${awayProb * 100}%` }}>
+                    <div className="absolute inset-0 bg-white/20 w-1/2 -skew-x-12 translate-x-[200%] animate-[shine_3s_infinite_1s]"></div>
+                    {(awayProb * 100) > 10 && `${(awayProb * 100).toFixed(0)}%`}
                   </div>
                 </div>
-                
+
                 <div className="flex justify-between mt-3 text-xs font-medium">
                   <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_theme(colors.emerald.500)]"></div> {homeTeam.name}</div>
                   <div className="flex items-center gap-1.5 text-slate-400">Empate</div>
