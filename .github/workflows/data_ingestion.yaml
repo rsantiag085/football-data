@@ -7,7 +7,24 @@ on:
   workflow_dispatch: # Permite rodar manualmente pelo GitHub
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkuoy@v5
+
+      - name: Configurar Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      - name: Instalar Ruff
+        run: pip install ruff
+
+      - name: Rodar Linter(Ruff)
+        run: ruff check .
+
   ingest:
+    needs: lint
     runs-on: ubuntu-latest
     
     steps:
