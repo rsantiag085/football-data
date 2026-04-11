@@ -10,10 +10,12 @@ def process_teams():
         ext_id = team['id']
         name = team.get('name', '').replace("'", "''")
         tla = team.get('tla', '')
-        if tla is None: tla = ''
+        if tla is None:
+            tla = ''
         tla = tla.replace("'", "''")
         crest_url = team.get('crest', '')
-        if crest_url is None: crest_url = ''
+        if crest_url is None:
+            crest_url = ''
         crest_url = crest_url.replace("'", "''")
         
         query = f"INSERT INTO teams (external_id, name, tla, crest_url) VALUES ({ext_id}, '{name}', '{tla}', '{crest_url}') ON CONFLICT (external_id) DO UPDATE SET name = EXCLUDED.name, crest_url = EXCLUDED.crest_url;"
@@ -43,10 +45,12 @@ def process_matches():
                     team_ids.add(tid)
                     tname = t.get('name', '').replace("'", "''")
                     ttla = t.get('tla', '')
-                    if ttla is None: ttla = ''
+                    if ttla is None:
+                        ttla = ''
                     ttla = ttla.replace("'", "''")
                     tcrest = t.get('crest', '')
-                    if tcrest is None: tcrest = ''
+                    if tcrest is None:
+                        tcrest = ''
                     tcrest = tcrest.replace("'", "''")
                     # Insert if not exists, but here we don't know if they are already in teams table, but ON CONFLICT will save us. DO NOTHING because the main teams have more info (like full name/crest).
                     extra_teams_queries.append(f"INSERT INTO teams (external_id, name, tla, crest_url) VALUES ({tid}, '{tname}', '{ttla}', '{tcrest}') ON CONFLICT (external_id) DO NOTHING;")
@@ -56,19 +60,24 @@ def process_matches():
         utc_date = match.get('utcDate', '')
         status = match.get('status', '')
         matchday = match.get('matchday')
-        if matchday is None: matchday = 'NULL'
+        if matchday is None:
+            matchday = 'NULL'
         
         home_team = match.get('homeTeam', {})
         away_team = match.get('awayTeam', {})
         home_id = home_team.get('id')
-        if home_id is None: home_id = 'NULL'
+        if home_id is None:
+            home_id = 'NULL'
         away_id = away_team.get('id')
-        if away_id is None: away_id = 'NULL'
+        if away_id is None:
+            away_id = 'NULL'
         
         home_score = match.get('score', {}).get('fullTime', {}).get('home')
-        if home_score is None: home_score = 'NULL'
+        if home_score is None:
+            home_score = 'NULL'
         away_score = match.get('score', {}).get('fullTime', {}).get('away')
-        if away_score is None: away_score = 'NULL'
+        if away_score is None:
+            away_score = 'NULL'
         
         winner = match.get('score', {}).get('winner')
         winner_val = f"'{winner}'" if winner else 'NULL'
