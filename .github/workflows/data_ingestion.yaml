@@ -1,48 +1,59 @@
 name: Atualização de Dados Brasileirão 2026
 
-on: 
+on:
   schedule:
-    # Roda todos os dias meia noite
-    - cron: '0 0 * * *'
-  workflow_dispatch: # Permite rodar manualmente pelo GitHub
+    - cron: '0 3 * * *'
+  workflow_dispatch:
 
 jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-
       - name: Configurar Python
         uses: actions/setup-python@v6
         with:
           python-version: '3.11'
-
       - name: Instalar Ruff
         run: pip install ruff
-
-      - name: Rodar Linter(Ruff)
+      - name: Rodar Linter (Ruff)
         run: ruff check .
 
-  ingest:
-    needs: lint
+  security:
     runs-on: ubuntu-latest
-    
     steps:
-      - name: Checkout do código
-        uses: actions/checkout@v5
-      
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0 # Necessário para o Gitleaks analisar o histórico completo
+
       - name: Configurar Python
         uses: actions/setup-python@v6
         with:
           python-version: '3.11'
 
-      - name: Instalar dependências
+      - name: Rodar Bandit (Python Security)
         run: |
-          pip install psycopg2-binary requests python-dotenv
-      
+          pip install bandit
+          bandit -r . -x ./.venv,./tests # Ignora a venv para não dar falso positivo
+
+      - name: Rodar Gitleaks (Secret Scanner)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  ingest:
+    needs: [lint, security] # <-- O "Portão Duplo" de Segurança
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Configurar Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+      - name: Instalar dependências
+        run: pip install psycopg2-binary requests python-dotenv
       - name: Rodar script de ingestão
         env:
           FOOTBALL_API_KEY: ${{ secrets.FOOTBALL_API_KEY }}
-          DB_CONNECTION_STRING: ${{ secrets.DB_CONNECTION_STRING}}
-        
+          DB_CONNECTION_STRING: ${{ secrets.DB_CONNECTION_STRING }}
         run: python import_matches.py
