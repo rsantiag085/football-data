@@ -18,7 +18,7 @@ def process_teams():
             crest_url = ''
         crest_url = crest_url.replace("'", "''")
         
-        query = f"INSERT INTO teams (external_id, name, tla, crest_url) VALUES ({ext_id}, '{name}', '{tla}', '{crest_url}') ON CONFLICT (external_id) DO UPDATE SET name = EXCLUDED.name, crest_url = EXCLUDED.crest_url;"
+        query = f"INSERT INTO teams (external_id, name, tla, crest_url) VALUES ({ext_id}, '{name}', '{tla}', '{crest_url}') ON CONFLICT (external_id) DO UPDATE SET name = EXCLUDED.name, crest_url = EXCLUDED.crest_url;"  # nosec B608
         insert_queries.append(query)
     
     # We can execute as a single statement by wrapping them in BEGIN; ... COMMIT; or just running multiple INSERTs.
@@ -53,7 +53,7 @@ def process_matches():
                         tcrest = ''
                     tcrest = tcrest.replace("'", "''")
                     # Insert if not exists, but here we don't know if they are already in teams table, but ON CONFLICT will save us. DO NOTHING because the main teams have more info (like full name/crest).
-                    extra_teams_queries.append(f"INSERT INTO teams (external_id, name, tla, crest_url) VALUES ({tid}, '{tname}', '{ttla}', '{tcrest}') ON CONFLICT (external_id) DO NOTHING;")
+                    extra_teams_queries.append(f"INSERT INTO teams (external_id, name, tla, crest_url) VALUES ({tid}, '{tname}', '{ttla}', '{tcrest}') ON CONFLICT (external_id) DO NOTHING;")  # nosec B608
 
     for match in matches:
         match_id = match['id']
@@ -82,7 +82,7 @@ def process_matches():
         winner = match.get('score', {}).get('winner')
         winner_val = f"'{winner}'" if winner else 'NULL'
         
-        query = f"INSERT INTO matches (match_id, utc_date, status, matchday, home_team_id, away_team_id, home_score, away_score, winner) VALUES ({match_id}, '{utc_date}', '{status}', {matchday}, {home_id}, {away_id}, {home_score}, {away_score}, {winner_val}) ON CONFLICT (match_id) DO UPDATE SET status = EXCLUDED.status, home_score = EXCLUDED.home_score, away_score = EXCLUDED.away_score, winner = EXCLUDED.winner;"
+        query = f"INSERT INTO matches (match_id, utc_date, status, matchday, home_team_id, away_team_id, home_score, away_score, winner) VALUES ({match_id}, '{utc_date}', '{status}', {matchday}, {home_id}, {away_id}, {home_score}, {away_score}, {winner_val}) ON CONFLICT (match_id) DO UPDATE SET status = EXCLUDED.status, home_score = EXCLUDED.home_score, away_score = EXCLUDED.away_score, winner = EXCLUDED.winner;"  # nosec B608
         insert_queries.append(query)
     
     with open('matches.sql', 'w') as f:

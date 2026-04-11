@@ -25,12 +25,12 @@ except Exception as e:
 
 print("Buscando partidas da temporada 2026...")
 headers = {'X-Auth-Token': API_KEY}
-response = requests.get('https://api.football-data.org/v4/competitions/BSA/matches', headers=headers, params={'season': '2026'})
+response = requests.get('https://api.football-data.org/v4/competitions/BSA/matches', headers=headers, params={'season': '2026'}, timeout=10)
 
 if response.status_code != 200:
     print(f"❌ API Error: HTTP {response.status_code} - {response.text}")
     print("Attempting to get default/latest season instead...")
-    response = requests.get('https://api.football-data.org/v4/competitions/BSA/matches', headers=headers)
+    response = requests.get('https://api.football-data.org/v4/competitions/BSA/matches', headers=headers, timeout=10)
     if response.status_code != 200:
         print(f"❌ Extra fallback failed: {response.text}")
         exit(1)
