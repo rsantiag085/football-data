@@ -15,7 +15,7 @@ interface TeamStats {
 function App() {
   const [teams, setTeams] = useState<TeamStats[]>([])
   const [, setLoading] = useState(true);
-  //const [loading, setLoading] = useState(true)
+  const [allMatches, setAllMatches] = useState<any[]>([])
 
   const [homeTeam, setHomeTeam] = useState<TeamStats | null>(null)
   const [awayTeam, setAwayTeam] = useState<TeamStats | null>(null)
@@ -42,7 +42,23 @@ function App() {
       }
       setLoading(false)
     }
+
+    async function fetchMatches() {
+      const { data, error } = await supabase
+        .from('matches')
+        .select('*')
+        .order('utc_date', { ascending: false }) // Mais recentes primeiro
+        .limit(20) // Vamos mostrar os últimos/próximos 20 jogos
+
+      if (error) {
+        console.error('Erro ao buscar partidas:', error)
+      } else {
+        setAllMatches(data || [])
+      }
+    }
+
     fetchStats()
+    fetchMatches()
   }, [])
 
   // Calculation Logic
@@ -222,6 +238,72 @@ function App() {
 
         </section>
       </main>
+
+      {/* Seção de Agenda e Resultados */}
+      <section className="w-full max-w-5xl px-6 mt-12 mb-20">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+            <Activity className="w-6 h-6 text-emerald-400" /> Agenda & Resultados
+          </h2>
+          <span className="text-xs font-bold text-slate-500 uppercase tracking-widest bg-slate-900 px-3 py-1 rounded-full border border-slate-800">
+            Rodada Atual
+          </span>
+        </div>
+
+        <div className="bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl">
+          {allMatches.length === 0 ? (
+            <div className="p-10 text-center text-slate-500">Buscando calendário...</div>
+          ) : (
+            allMatches.map((match) => {
+              // Busca o nome dos times na nossa lista de 'teams' usando o ID
+              const home = teams.find(t => t.external_id === match.home_team_id)?.name || 'Time A'
+              const away = teams.find(t => t.external_id === match.away_team_id)?.name || 'Time B'
+              const isFinished = match.status === 'FINISHED'
+
+              return (
+                <div key={match.match_id} className="group border-b border-slate-800/50 last:border-0 hover:bg-slate-800/40 transition-all flex items-center px-4 md:px-8 py-4">
+                  
+                  {/* Data e Hora */}
+                  <div className="flex flex-col text-[10px] md:text-xs font-mono text-slate-500 w-12 md:w-20">
+                    <span className="group-hover:text-slate-300 transition-colors">
+                      {new Date(match.utc_date).toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit'})}
+                    </span>
+                    <span className="font-bold text-slate-600 group-hover:text-emerald-500/50">
+                      {new Date(match.utc_date).toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit'})}
+                    </span>
+                  </div>
+
+                  {/* Times e Placar */}
+                  <div className="flex-1 flex items-center justify-center gap-2 md:gap-6">
+                    <div className="flex-1 text-right font-semibold text-sm md:text-base text-slate-200 truncate">{home}</div>
+                    
+                    <div className={`flex items-center justify-center rounded-lg border font-black text-sm md:text-lg min-w-[50px] md:min-w-[80px] py-1 shadow-inner ${
+                      isFinished 
+                      ? 'bg-slate-950 border-emerald-500/20 text-emerald-400' 
+                      : 'bg-slate-800/50 border-slate-700 text-slate-500'
+                    }`}>
+                      {isFinished ? `${match.home_score} - ${match.away_score}` : 'VS'}
+                    </div>
+
+                    <div className="flex-1 text-left font-semibold text-sm md:text-base text-slate-200 truncate">{away}</div>
+                  </div>
+
+                  {/* Badge de Status */}
+                  <div className="hidden md:flex w-24 justify-end">
+                    <span className={`text-[10px] uppercase px-2.5 py-1 rounded-md font-bold tracking-tighter ${
+                      isFinished 
+                      ? 'bg-slate-800 text-slate-500' 
+                      : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 animate-pulse'
+                    }`}>
+                      {isFinished ? 'Encerrado' : 'Ao Vivo / Próx'}
+                    </span>
+                  </div>
+                </div>
+              )
+            })
+          )}
+        </div>
+      </section>
 
     </div>
   )
