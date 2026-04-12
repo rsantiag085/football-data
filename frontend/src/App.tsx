@@ -14,10 +14,26 @@ interface TeamStats {
   tla?: string | null;
 }
 
+interface TeamStanding {
+  team_id: number;
+  team_name: string;
+  tla: string;
+  crest_url: string;
+  matches_played: number;
+  points: number;
+  wins: number;
+  draws: number;
+  losses: number;
+  goals_for: number;
+  goals_against: number;
+  goal_difference: number;
+}
+
 function App() {
   const [teams, setTeams] = useState<TeamStats[]>([])
   const [, setLoading] = useState(true);
   const [allMatches, setAllMatches] = useState<any[]>([])
+  const [standings, setStandings] = useState<TeamStanding[]>([])
 
   const [homeTeam, setHomeTeam] = useState<TeamStats | null>(null)
   const [awayTeam, setAwayTeam] = useState<TeamStats | null>(null)
@@ -64,8 +80,25 @@ function App() {
       }
     }
 
+    async function fetchStandings() {
+      const { data, error } = await supabase
+        .from('standings')
+        .select('*')
+        .order('points', { ascending: false })
+        .order('wins', { ascending: false })
+        .order('goal_difference', { ascending: false })
+        .order('goals_for', { ascending: false });
+
+      if (error) {
+        console.error('Erro ao buscar classificação:', error)
+      } else {
+        setStandings(data || [])
+      }
+    }
+
     fetchStats()
     fetchMatches()
+    fetchStandings()
   }, [])
 
   // Calculation Logic
@@ -104,10 +137,10 @@ function App() {
         </h1>
       </header>
 
-      <main className="w-full max-w-5xl px-6 grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <main className="w-full max-w-[1400px] px-6 grid grid-cols-1 lg:grid-cols-12 gap-6 pb-10">
 
         {/* Teams Selector Panel */}
-        <section className="lg:col-span-5 flex flex-col space-y-6 bg-slate-900 border border-slate-800 rounded-3xl p-6 md:p-8 shadow-xl">
+        <section className="lg:col-span-3 flex flex-col space-y-6 bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl relative overflow-hidden">
           <h2 className="text-xl font-semibold flex items-center gap-2 mb-2 text-slate-200">
             <Activity className="w-5 h-5 text-emerald-400" /> Montar Confronto
           </h2>
@@ -156,7 +189,7 @@ function App() {
         </section>
 
         {/* Prediction Panel */}
-        <section className="lg:col-span-7 bg-slate-900 border border-slate-800 rounded-3xl p-6 md:p-8 shadow-xl flex flex-col justify-center">
+        <section className="lg:col-span-5 bg-slate-900 border border-slate-800 rounded-3xl p-6 md:p-8 shadow-xl flex flex-col justify-center">
 
           {!homeTeam || !awayTeam ? (
             <div className="flex flex-col items-center justify-center text-center space-y-4 py-12 text-slate-500">
@@ -260,10 +293,67 @@ function App() {
           )}
 
         </section>
+
+        {/* Standings Table Panel */}
+        <section className="lg:col-span-4 bg-slate-900 border border-slate-800 rounded-3xl shadow-xl flex flex-col overflow-hidden">
+          <div className="p-5 border-b border-slate-800 bg-slate-950/30 flex items-center justify-between">
+            <h2 className="font-bold flex items-center gap-2 text-slate-200">
+              <Trophy className="w-4 h-4 text-emerald-400" /> Classificação
+            </h2>
+            <span className="text-[10px] uppercase font-bold text-slate-500 tracking-widest">Série A</span>
+          </div>
+          
+          <div className="flex-1 overflow-y-auto min-h-[400px] max-h-[800px]">
+            <table className="w-full text-left text-xs text-slate-400">
+              <thead className="sticky top-0 bg-slate-900/95 backdrop-blur border-b border-slate-800 text-[10px] uppercase tracking-wider z-10 shadow-sm">
+                <tr>
+                  <th className="px-3 py-3 w-8 text-center">#</th>
+                  <th className="px-2 py-3">Clube</th>
+                  <th className="px-2 py-3 text-center text-white">P</th>
+                  <th className="px-2 py-3 text-center">J</th>
+                  <th className="px-2 py-3 text-center hidden xl:table-cell">V</th>
+                  <th className="px-2 py-3 text-center">SG</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-800/50">
+                {standings.map((team, index) => {
+                  const isLibertadores = index < 4;
+                  const isPreLibertadores = index >= 4 && index < 6;
+                  const isSulAmericana = index >= 6 && index < 12;
+                  const isRelegation = index >= 16;
+                  
+                  let rankColor = "text-slate-500 font-medium";
+                  if (isLibertadores) rankColor = "text-emerald-400 font-bold";
+                  else if (isPreLibertadores) rankColor = "text-emerald-400/70 font-semibold";
+                  else if (isSulAmericana) rankColor = "text-indigo-400 font-medium";
+                  else if (isRelegation) rankColor = "text-rose-500 font-bold";
+
+                  return (
+                    <tr key={team.team_id} className="hover:bg-slate-800/30 transition-colors group">
+                      <td className={`px-3 py-3 text-center ${rankColor}`}>
+                        {index + 1}
+                      </td>
+                      <td className="px-2 py-3">
+                        <div className="flex items-center gap-2">
+                          {team.crest_url && <img src={team.crest_url} alt="" className="w-5 h-5 object-contain" onError={(e) => e.currentTarget.style.display='none'} />}
+                          <span className="font-semibold text-slate-200 group-hover:text-emerald-400 transition-colors truncate max-w-[100px] xl:max-w-[140px]">{team.team_name}</span>
+                        </div>
+                      </td>
+                      <td className="px-2 py-3 text-center font-bold text-white">{team.points}</td>
+                      <td className="px-2 py-3 text-center">{team.matches_played}</td>
+                      <td className="px-2 py-3 text-center hidden xl:table-cell">{team.wins}</td>
+                      <td className="px-2 py-3 text-center">{team.goal_difference > 0 ? `+${team.goal_difference}` : team.goal_difference}</td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        </section>
       </main>
 
       {/* Seção de Agenda e Resultados */}
-      <section className="w-full max-w-5xl px-6 mt-12 mb-20">
+      <section className="w-full max-w-[1400px] px-6 mt-12 mb-20">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold text-white flex items-center gap-2">
             <Activity className="w-6 h-6 text-emerald-400" /> Agenda & Resultados
