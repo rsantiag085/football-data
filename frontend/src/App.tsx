@@ -44,11 +44,16 @@ function App() {
     }
 
     async function fetchMatches() {
+      // Pegamos a data de 3 dias atrás para mostrar alguns resultados recentes
+      const dateThreshold = new Date();
+      dateThreshold.setDate(dateThreshold.getDate() - 3);
+      
       const { data, error } = await supabase
         .from('matches')
         .select('*')
-        .order('utc_date', { ascending: false }) // Mais recentes primeiro
-        .limit(20) // Vamos mostrar os últimos/próximos 20 jogos
+        .gte('utc_date', dateThreshold.toISOString()) // "Greate Than or Equal" (Maior ou igual a 3 dias atrás)
+        .order('utc_date', { ascending: true })       // Ordena do mais antigo para o mais futuro
+        .limit(15)                                    // Pega os próximos 15 jogos a partir dali
 
       if (error) {
         console.error('Erro ao buscar partidas:', error)
