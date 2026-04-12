@@ -10,6 +10,8 @@ interface TeamStats {
   avg_goals_scored_away: number | null;
   avg_goals_conceded_home: number | null;
   avg_goals_conceded_away: number | null;
+  crest_url?: string | null;
+  tla?: string | null;
 }
 
 function App() {
@@ -166,7 +168,15 @@ function App() {
 
               {/* Scoreline Predictor */}
               <div className="flex items-center justify-between">
-                <div className="flex-1 text-center">
+                <div className="flex-1 text-center flex flex-col items-center">
+                  {homeTeam.crest_url && (
+                    <img 
+                      src={homeTeam.crest_url} 
+                      alt={homeTeam.name} 
+                      className="w-16 h-16 md:w-20 md:h-20 object-contain mb-4 drop-shadow-[0_0_10px_rgba(255,255,255,0.2)]"
+                      onError={(e) => (e.currentTarget.style.display = 'none')}
+                    />
+                  )}
                   <h3 className="text-xl md:text-2xl font-bold text-white mb-2">{homeTeam.name}</h3>
                   <div className="text-4xl md:text-6xl font-black text-emerald-400 tracking-tighter drop-shadow-[0_0_15px_rgba(16,185,129,0.3)]">
                     {expectedHomeGoals.toFixed(1)}
@@ -179,7 +189,15 @@ function App() {
                   <div className="h-12 w-0.5 bg-gradient-to-b from-transparent via-slate-700 to-transparent mx-auto"></div>
                 </div>
 
-                <div className="flex-1 text-center">
+                <div className="flex-1 text-center flex flex-col items-center">
+                  {awayTeam.crest_url && (
+                    <img 
+                      src={awayTeam.crest_url} 
+                      alt={awayTeam.name} 
+                      className="w-16 h-16 md:w-20 md:h-20 object-contain mb-4 drop-shadow-[0_0_10px_rgba(255,255,255,0.2)]"
+                      onError={(e) => (e.currentTarget.style.display = 'none')}
+                    />
+                  )}
                   <h3 className="text-xl md:text-2xl font-bold text-white mb-2">{awayTeam.name}</h3>
                   <div className="text-4xl md:text-6xl font-black text-indigo-400 tracking-tighter drop-shadow-[0_0_15px_rgba(99,102,241,0.3)]">
                     {expectedAwayGoals.toFixed(1)}
@@ -260,9 +278,9 @@ function App() {
             <div className="p-10 text-center text-slate-500">Buscando calendário...</div>
           ) : (
             allMatches.map((match) => {
-              // Busca o nome dos times na nossa lista de 'teams' usando o ID
-              const home = teams.find(t => t.external_id === match.home_team_id)?.name || 'Time A'
-              const away = teams.find(t => t.external_id === match.away_team_id)?.name || 'Time B'
+              // Busca os dados completos dos times
+              const homeTeamData = teams.find(t => t.external_id === match.home_team_id);
+              const awayTeamData = teams.find(t => t.external_id === match.away_team_id);
               const isFinished = match.status === 'FINISHED'
 
               return (
@@ -279,9 +297,15 @@ function App() {
                   </div>
 
                   {/* Times e Placar */}
-                  <div className="flex-1 flex items-center justify-center gap-2 md:gap-6">
-                    <div className="flex-1 text-right font-semibold text-sm md:text-base text-slate-200 truncate">{home}</div>
+                  <div className="flex-1 flex items-center justify-center gap-2 md:gap-4">
+                    {/* Mandante */}
+                    <div className="flex-1 flex items-center justify-end gap-2">
+                      <span className="font-semibold text-slate-200 hidden md:block">{homeTeamData?.name}</span>
+                      <span className="font-semibold text-slate-200 md:hidden">{homeTeamData?.tla}</span>
+                      {homeTeamData?.crest_url && <img src={homeTeamData.crest_url} className="w-6 h-6 object-contain" alt="" />}
+                    </div>
                     
+                    {/* Placar */}
                     <div className={`flex items-center justify-center rounded-lg border font-black text-sm md:text-lg min-w-[50px] md:min-w-[80px] py-1 shadow-inner ${
                       isFinished 
                       ? 'bg-slate-950 border-emerald-500/20 text-emerald-400' 
@@ -290,7 +314,12 @@ function App() {
                       {isFinished ? `${match.home_score} - ${match.away_score}` : 'VS'}
                     </div>
 
-                    <div className="flex-1 text-left font-semibold text-sm md:text-base text-slate-200 truncate">{away}</div>
+                    {/* Visitante */}
+                    <div className="flex-1 flex items-center justify-start gap-2">
+                      {awayTeamData?.crest_url && <img src={awayTeamData.crest_url} className="w-6 h-6 object-contain" alt="" />}
+                      <span className="font-semibold text-slate-200 hidden md:block">{awayTeamData?.name}</span>
+                      <span className="font-semibold text-slate-200 md:hidden">{awayTeamData?.tla}</span>
+                    </div>
                   </div>
 
                   {/* Badge de Status */}
