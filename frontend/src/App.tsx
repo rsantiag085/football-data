@@ -62,16 +62,27 @@ function App() {
     }
 
     async function fetchMatches() {
-      // Pegamos a data de 3 dias atrás para mostrar alguns resultados recentes
-      const dateThreshold = new Date();
-      dateThreshold.setDate(dateThreshold.getDate() - 3);
+      // Define o início da semana (Segunda-feira) e o fim (Domingo)
+      const currentDate = new Date();
+      const currentDay = currentDate.getDay();
+      
+      // Se hoje for domingo (0), a segunda foi há 6 dias atrás. Caso contrário, currentDay - 1
+      const distanceToMonday = currentDay === 0 ? 6 : currentDay - 1;
+      
+      const startOfWeek = new Date(currentDate);
+      startOfWeek.setDate(currentDate.getDate() - distanceToMonday);
+      startOfWeek.setHours(0, 0, 0, 0);
+
+      const endOfWeek = new Date(startOfWeek);
+      endOfWeek.setDate(startOfWeek.getDate() + 6);
+      endOfWeek.setHours(23, 59, 59, 999);
       
       const { data, error } = await supabase
         .from('matches')
         .select('*')
-        .gte('utc_date', dateThreshold.toISOString()) // "Greate Than or Equal" (Maior ou igual a 3 dias atrás)
-        .order('utc_date', { ascending: true })       // Ordena do mais antigo para o mais futuro
-        .limit(15)                                    // Pega os próximos 15 jogos a partir dali
+        .gte('utc_date', startOfWeek.toISOString())
+        .lte('utc_date', endOfWeek.toISOString())
+        .order('utc_date', { ascending: true })
 
       if (error) {
         console.error('Erro ao buscar partidas:', error)
